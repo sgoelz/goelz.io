@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="de">
+<base href="./">
+<meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="goelz.io – virtuelles Nichts mit Stil.">
+  <meta name="author" content="Sébastien Gölz">
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="canonical" href="https://goelz.io/">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎉</text></svg>">
+  <meta property="og:title" content="goelz.io – Virtuelles Nichts mit Konfetti">
+  <meta property="og:description" content="Diese Seite bietet nicht viel. Außer Konfetti, LinkedIn & GitHub.">
+  <meta property="og:url" content="https://goelz.io/">
+  <meta property="og:type" content="website">
+  <title>goelz.io</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: #0d0d0d;
+      color: white;
+      font-family: system-ui, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+    }
+    canvas {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+    }
+    .overlay {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 2rem 1rem;
+    }
+    h1 {
+      font-size: clamp(1.5rem, 4vw, 2.5rem);
+    }
+    footer {
+      width: 100%;
+      text-align: center;
+      padding: 1rem 0;
+      z-index: 1;
+    }
+    footer a {
+      margin: 0 10px;
+      display: inline-block;
+    }
+    footer img, footer svg {
+      width: 32px;
+      height: 32px;
+      filter: invert(1) grayscale(100%) brightness(150%);
+      transition: transform 0.3s ease;
+    }
+    footer img:hover,
+    footer img:focus-visible,
+    footer svg:hover,
+    footer svg:focus-visible {
+      transform: scale(1.1);
+    }
+  </style>
+</head>
+<body>
+  <canvas id="neuralCanvas" aria-hidden="true"></canvas>
+
+  <div class="overlay">
+    <h1 role="heading" aria-level="1">
+      Virtuelles Nichts – handverlesen kuratiert.<br>
+      <span style="opacity: 0.7; font-size: 0.9em; display: block; margin-top: 0.5em;">goelz.io</span>
+    </h1>
+  </div>
+
+  <canvas id="confettiCanvas" aria-hidden="true" style="z-index:2;"></canvas>
+
+  <footer>
+    <a href="https://www.linkedin.com/in/sgoelz" target="_blank" aria-label="LinkedIn-Profil von Sébastien Gölz" title="LinkedIn-Profil öffnen">
+      <img src="assets/icons/linkedin.svg" alt="LinkedIn Icon">
+    </a>
+    <a href="https://github.com/sgoelz" target="_blank" aria-label="GitHub-Profil von Sébastien Gölz" title="GitHub-Profil öffnen">
+      <img src="assets/icons/github.svg" alt="GitHub Icon">
+    </a>
+    <a href="#" id="confettiIcon" aria-label="Konfetti-Kanone starten" title="Konfetti-Kanone starten">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 72 72" width="32" height="32">
+        <text y="50%" x="50%" dominant-baseline="middle" text-anchor="middle" font-size="48">🎉</text>
+      </svg>
+    </a>
+  </footer>
+
+  <script>
+    const startConfetti = () => {
+      const canvas = document.getElementById("confettiCanvas");
+      const ctx = canvas.getContext("2d");
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+
+      const confetti = Array.from({ length: 150 }, () => ({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height - canvas.height,
+        r: 5 + Math.random() * 5,
+        d: Math.random() * 10,
+        color: `hsl(${Math.random() * 360}, 70%, 60%)`,
+        tilt: Math.random() * 10 - 5,
+        tiltAngleIncrement: 0.05 + Math.random() * 0.05,
+        tiltAngle: 0
+      }));
+
+      const draw = () => {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        confetti.forEach(c => {
+          ctx.beginPath();
+          ctx.lineWidth = c.r / 2;
+          ctx.strokeStyle = c.color;
+          ctx.moveTo(c.x + c.tilt + c.r / 4, c.y);
+          ctx.lineTo(c.x + c.tilt, c.y + c.tilt + c.r / 4);
+          ctx.stroke();
+        });
+        update();
+        requestAnimationFrame(draw);
+      };
+
+      const update = () => {
+        confetti.forEach((c, i) => {
+          c.tiltAngle += c.tiltAngleIncrement;
+          c.y += (Math.cos(c.d) + 3 + c.r / 2) / 2;
+          c.x += Math.sin(c.d);
+          c.tilt = Math.sin(c.tiltAngle - i / 3) * 15;
+        });
+      };
+
+      draw();
+    };
+
+    const initNeuralBackground = () => {
+      const canvas = document.getElementById('neuralCanvas');
+      const ctx = canvas.getContext('2d');
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+
+      const nodes = Array.from({ length: 80 }, () => ({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        r: 2 + Math.random() * 2,
+        dx: Math.random() * 0.5 - 0.25,
+        dy: Math.random() * 0.5 - 0.25
+      }));
+
+      const drawNetwork = () => {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        nodes.forEach(n => {
+          n.x += n.dx;
+          n.y += n.dy;
+          if (n.x < 0 || n.x > canvas.width) n.dx *= -1;
+          if (n.y < 0 || n.y > canvas.height) n.dy *= -1;
+          ctx.beginPath();
+          ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2);
+          ctx.fillStyle = '#1abc9c';
+          ctx.fill();
+        });
+
+        for (let i = 0; i < nodes.length; i++) {
+          for (let j = i + 1; j < nodes.length; j++) {
+            const a = nodes[i];
+            const b = nodes[j];
+            const dist = Math.hypot(a.x - b.x, a.y - b.y);
+            if (dist < 100) {
+              ctx.beginPath();
+              ctx.moveTo(a.x, a.y);
+              ctx.lineTo(b.x, b.y);
+              ctx.strokeStyle = `rgba(26, 188, 156, ${1 - dist / 100})`;
+              ctx.stroke();
+            }
+          }
+        }
+        requestAnimationFrame(drawNetwork);
+      };
+
+      drawNetwork();
+    };
+
+    window.addEventListener("DOMContentLoaded", () => {
+      initNeuralBackground();
+      document.getElementById("confettiIcon").addEventListener("click", e => {
+        e.preventDefault();
+        startConfetti();
+      });
+    });
+  </script>
+</body>
+</html>
